@@ -29,17 +29,14 @@ for line in program_lines:
 
     if opcode == "PUSH":
         program.append(int(tokens[1]))
-        token_counter += 1
     elif opcode == "PRINT":
         string_literal = ' '.join(tokens[1:])[1:-1]
         program.append(string_literal)
-        token_counter += 1
     elif opcode == "JUMP.EQ.0":
         program.append(tokens[1])
-        token_counter += 1
     elif opcode == "JUMP.GT.0":
         program.append(tokens[1])
-        token_counter += 1
+    token_counter += 1
 
 print(program)
 
