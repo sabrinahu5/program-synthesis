@@ -1,4 +1,9 @@
 from dataclasses import dataclass
+
+@dataclass
+class Input:
+    x: str
+
 @dataclass
 class Constant:
     s: str
@@ -135,77 +140,79 @@ class Value:
 
 Expression = Concatenate | Left | Right | Repeat | Substitute | SubstituteI | To_Text | Lower | Upper | Proper | If | Add | Minus | Divide | Find | FindI | Len | Exact | Equals | GT | GE | IsNumber | Value
 
-def execute(e):
+def execute(e, env):
     match e:
+        case Input(x):
+            return env[x]
         case Constant(s):
             return s
         case Concatenate(e1, e2):
-            return execute(e1) + execute(e2)
+            return execute(e1, env) + execute(e, env)
         case Left(e, i):
-            s = execute(e)
+            s = execute(e, env)
             return s[:i]
         case Right(e, i):
-            s = execute(e)
+            s = execute(e, env)
             return s[len(s)-i:]
         case Mid(e, i1, i2):
             s = execute(e)
             return s[i1:i1+i2]
         case Replace(e1, e2, i1, i2):
-            s = execute(e1)
-            r = execute(e2)
+            s = execute(e1, env)
+            r = execute(e2, env)
             return s[:i1] + r + s[i1+i2:]
         case Trim(e):
-            s = execute(e)
+            s = execute(e, env)
             return s.strip()
         case Repeat(i1, i2):
             return i1 * i2
         case Substitute(e1, e2, e3):
-            s1 = execute(e1)
-            s2 = execute(e2)
-            s3 = execute(e3)
+            s1 = execute(e1, env)
+            s2 = execute(e2, env)
+            s3 = execute(e3, env)
             if s2 in s1:
                 return s1.replace(s2, s3)
             else:
                 print(s2 + " not in " + s1)
                 return s1
         case SubstituteI(e1, e2, e3, i):
-            s1 = execute(e1)
-            s2 = execute(e2)
-            s3 = execute(e3)
-            return execute(s1).replace(s2, s3, i)
+            s1 = execute(e1, env)
+            s2 = execute(e2, env)
+            s3 = execute(e3, env)
+            return s1.replace(s2, s3, i)
         case To_Text(i):
             return str(i)
         case Lower(e):
-            s = execute(e)
+            s = execute(e, env)
             return s.lower()
         case Upper(e):
-            s = execute(e)
+            s = execute(e, env)
             return s.upper()
         case Proper(e):
-            s = execute(e)
+            s = execute(e, env)
             return s.title()
         case If(e1, e2, e3):
-            return execute(e2) if execute(e1) else execute(e3)
+            return execute(e2, env) if execute(e1, env) else execute(e3, env)
         case Add(i1, i2):
             return i1 + i2
-        case Minus(e1, e2):
+        case Minus(i1, i2):
             return i1 - i2
-        case Divide(e1, e2):
+        case Divide(i1, i2):
             return i1 // i2
         case Find(e1, e2):
-            s1 = execute(e1)
-            s2 = execute(e2)
+            s1 = execute(e1, env)
+            s2 = execute(e2, env)
             return s2.find(s1)
         case FindI(e1, e2, i):
-            s1 = execute(e1)
-            s2 = execute(e2)
+            s1 = execute(e1, env)
+            s2 = execute(e2, env)
             return s2.find(s1, i)
         case Len(e):
-            s = execute(e)
+            s = execute(e, env)
             return len(s)
         case Exact(e1, e2):
-            s1 = execute(e1)
-            s2 = execute(e2)
+            s1 = execute(e1, env)
+            s2 = execute(e2, env)
             return s1 == s2
         case Equals(i1, i2):
             return i1 == i2
@@ -214,12 +221,14 @@ def execute(e):
         case GE(i1, i2):
             return i1 >= i2
         case IsNumber(e):
-            s = execute(e)
+            s = execute(e, env)
             return s.isnumeric()
         case Value(e):
-            s = execute(e)
+            s = execute(e, env)
             return int(s)
 
-
+env = {'x': 'bello'}
 e = Substitute(Constant("bello"), Constant("b"), Constant("c"))
-print(execute(e))
+e1 = Substitute(Input('x'), Constant("b"), Constant("c"))
+print(execute(e1, env))
+print(execute(e, env))
