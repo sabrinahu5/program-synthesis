@@ -271,27 +271,19 @@ print(execute(e2, env))
 
 def score_program(program, io_examples):
     total_score = 0
-    scores = []
     for example in io_examples:
         input_data, expected_output = example
         env = {'x': input_data}
         try:
             output = execute(program, env)
             if output == expected_output:
-                total_score += 1 
-                scores.append(1)         
+                total_score += 1       
             else:
-                total_score -= 1
-                scores.append(-1)      
+                return -1    
         except Incomplete:
-            total_score += 0
-            scores.append(0)      
+            total_score += 0    
     if io_examples:
-        # if sum is only of 1, -1 => -1
-        if all(score in [1, -1] for score in scores):
-            return -1
-        else:
-            return total_score / len(io_examples)
+        return total_score / len(io_examples)
     else:
         return 0
 
@@ -302,8 +294,11 @@ print("Test 1: " + str(score_program(e2, io_examples)))
 io_examples = [('bello', 'yes'), ('bello', 'no')]
 print("Test 2: " + str(score_program(e2, io_examples)))
 
-io_examples = [('bello', 'yes'), ('', ''), ('', 'no')]
+io_examples = [('bello', 'yes'), ('', '')]
 print("Test 3: " + str(score_program(e2, io_examples)))
 
-io_examples = [('bello', 'yes'), ('', ''), ('', 'no'), ('bello', 'no'), ('bello', 'no2')]
+io_examples = [('bello', 'yes'), ('', ''), ('', 'no')]
 print("Test 4: " + str(score_program(e2, io_examples)))
+
+io_examples = [('bello', 'yes'), ('', ''), ('', 'no'), ('bello', 'no'), ('bello', 'no2')]
+print("Test 5: " + str(score_program(e2, io_examples)))
