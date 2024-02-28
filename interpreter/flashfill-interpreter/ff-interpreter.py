@@ -304,3 +304,6 @@ print("Test 2: " + str(score_program(e2, io_examples)))
 
 io_examples = [('bello', 'yes'), ('', ''), ('', 'no')]
 print("Test 3: " + str(score_program(e2, io_examples)))
+
+io_examples = [('bello', 'yes'), ('', ''), ('', 'no'), ('bello', 'no'), ('bello', 'no2')]
+print("Test 4: " + str(score_program(e2, io_examples)))
