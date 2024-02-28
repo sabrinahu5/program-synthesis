@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 
+class Incomplete(Exception):
+    pass
+
 @dataclass
 class Input:
     x: str
@@ -7,6 +10,10 @@ class Input:
 @dataclass
 class Constant:
     s: str
+
+@dataclass
+class Hole:
+    pass
 
 @dataclass
 class Concatenate:
@@ -146,6 +153,8 @@ def execute(e, env):
             return env[x]
         case Constant(s):
             return s
+        case Hole():
+            raise Incomplete()
         case Concatenate(e1, e2):
             return execute(e1, env) + execute(e, env)
         case Left(e, i):
@@ -227,8 +236,71 @@ def execute(e, env):
             s = execute(e, env)
             return int(s)
 
-env = {'x': 'bello'}
+"""
+env = {'x': 'baby'}
+env2 = {'x': 'bell'}
 e = Substitute(Constant("bello"), Constant("b"), Constant("c"))
 e1 = Substitute(Input('x'), Constant("b"), Constant("c"))
 print(execute(e1, env))
+print(execute(e1, env2))
 print(execute(e, env))
+
+io_examples = [('bello', 'cello'), ('cab', 'cac'), ('boba', 'coca')]
+for (x, r) in io_examples:
+    env = {'x': x}
+    o = execute(e1, env)
+    print(o)
+    assert o == r
+
+# execute(Hole(), env)
+e2 = If(Input('x'), Constant('yes'), Hole())
+io_examples = [('bello', 'yes'), ('', '')]
+for (x, r) in io_examples:
+    env = {'x': x}
+    o = execute(e2, env)
+    print(o)
+    assert o == r
+print(execute(e2, env))
+"""
+
+# Input: program, io examples, Output: score
+# -1: not incomplete but not passing
+# 0: incomplete (when catch exception)
+# 1: passing
+# score: sum/total (if sum is only of 1, -1 => -1)
+
+def score_program(program, io_examples):
+    total_score = 0
+    scores = []
+    for example in io_examples:
+        input_data, expected_output = example
+        env = {'x': input_data}
+        try:
+            output = execute(program, env)
+            if output == expected_output:
+                total_score += 1 
+                scores.append(1)         
+            else:
+                total_score -= 1
+                scores.append(-1)      
+        except Incomplete:
+            total_score += 0
+            scores.append(0)      
+    if io_examples:
+        # if sum is only of 1, -1 => -1
+        if all(score in [1, -1] for score in scores):
+            return -1
+        else:
+            return total_score / len(io_examples)
+    else:
+        return 0
+
+e2 = If(Input('x'), Constant('yes'), Hole())
+io_examples = [('bello', 'yes'), ('', ''), ('bello', 'no')]
+print("Test 1: " + str(score_program(e2, io_examples)))
+
+io_examples = [('bello', 'yes'), ('bello', 'no')]
+print("Test 2: " + str(score_program(e2, io_examples)))
+
+io_examples = [('bello', 'yes'), ('', ''), ('', 'no')]
+print("Test 3: " + str(score_program(e2, io_examples)))
