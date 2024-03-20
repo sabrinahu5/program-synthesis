@@ -236,6 +236,17 @@ def execute(e, env):
             s = execute(e, env)
             return int(s)
 
+
+def types():
+    return {
+        'Constant': (Constant, ('str', ('str'))),
+        'Concatenate': (Concatenate, ('str', ('exp', 'exp'))),
+        'Left': (Left, ('str', ('exp', 'int'))),
+        'Right': (Right, ('str', ('exp', 'int'))),
+    }
+
+# Change representation of hole
+
 """
 env = {'x': 'baby'}
 env2 = {'x': 'bell'}
